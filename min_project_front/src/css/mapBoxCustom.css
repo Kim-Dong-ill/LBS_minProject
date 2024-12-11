@@ -1,0 +1,59 @@
+/* 입력 필드 플레이스홀더 텍스트 변경
+.mapboxgl-ctrl-directions .mapbox-directions-component-keyline:first-child input::placeholder {
+    content: "출발지를 입력하세요";
+}
+
+.mapboxgl-ctrl-directions .mapbox-directions-component-keyline:last-child input::placeholder {
+    content: "도착지를 입력하세요";
+}
+
+/* 프로필 선택 버튼 텍스트 변경 */
+/* .mapbox-directions-profile label[for="mapbox-directions-profile-driving"]::after {
+    content: "운전";
+}
+
+.mapbox-directions-profile label[for="mapbox-directions-profile-walking"]::after {
+    content: "도보";
+}
+
+.mapbox-directions-profile label[for="mapbox-directions-profile-cycling"]::after {
+    content: "자전거";
+}
+
+/* 플레이스홀더 텍스트 직접 변경 */
+/* .mapbox-directions-origin .mapbox-form-label {
+    display: none;
+}
+
+.mapbox-directions-destination .mapbox-form-label {
+    display: none;
+}
+
+.mapbox-directions-origin input {
+    content: attr(placeholder, "출발지를 입력하세요");
+}
+
+.mapbox-directions-destination input {
+    content: attr(placeholder, "도착지를 입력하세요");
+} */
+
+/* 교통량 버튼 텍스트 변경 */
+/* .mapboxgl-ctrl-traffic::before {
+    content: "교통량";
+} */
+ /* 전체 네비게이션 컨테이너 높이 조절 */
+.mapboxgl-ctrl-directions {
+    max-height: 500px; /* 원하는 높이로 조절 */
+    overflow-y: auto;
+}
+
+/* 경로 안내 목록 컨테이너 높이 조절 */
+.directions-control-directions {
+    max-height: 300px; /* 원하는 높이로 조절 */
+    overflow-y: auto;
+}
+
+/* 스크롤바 스타일링 (선택사항) */
+.directions-control-directions::-webkit-scrollbar {
+    display: none;
+}

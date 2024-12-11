@@ -3,6 +3,8 @@ import MapboxLanguage from "@mapbox/mapbox-gl-language";
 import {useEffect, useState} from 'react'
 import axios from 'axios'
 import benchIcon from "../../public/like.png"
+import initializeDirections from './initializeDirections'
+import '../css/mapBoxCustom.css'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
@@ -26,6 +28,9 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
         })
         map.addControl(language); //언어팩 설정
         
+        //네비게이션 길찾기 초기화
+        initializeDirections(map)
+
         //벤치 아이콘 추가
         map.on('load', () => {
             map.loadImage(`${benchIcon}`, (error, image) => {
