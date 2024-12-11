@@ -1,0 +1,21 @@
+.getBldgBtn{
+    width: 500px;
+    height: 40px;
+    background-color: #0080ff;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 5px;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    z-index: 99999;
+}
+.getBldgBtn:hover{
+    background-color: #0059b3;
+}

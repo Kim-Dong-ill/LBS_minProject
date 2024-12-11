@@ -1,0 +1,16 @@
+; ==건물 중심좌표로 반경 데이터 가져오기==
+SELECT 
+    bldg_id, 
+	ST_asText(bldg_geom) as 폴리곤,
+    ST_AsText(ST_Centroid(bldg_geom)) AS 중심점,
+    ST_Distance(
+        ST_Centroid(bldg_geom)::geography,
+        ST_MakePoint(127.0285, 37.4975)::geography
+    ) AS 거리m
+FROM 
+    dongill.bldg
+WHERE 
+    ST_Distance(
+        ST_Centroid(bldg_geom)::geography,
+        ST_MakePoint(127.0285, 37.4975)::geography
+    ) <= 500;
