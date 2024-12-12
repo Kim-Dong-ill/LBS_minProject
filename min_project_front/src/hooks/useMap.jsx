@@ -31,10 +31,19 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
                 currentPopup.remove();
                 setCurrentPopup(null);
             }
-            initializeDirections(map,originCoords,destCoords);
+            initializeDirections(map,originCoords,destCoords,handleCloseDir);
+        }else{
+
         }
     }, [isDest, isOrigin, map, originCoords, destCoords]);
 
+    const handleCloseDir = () =>{
+        console.log("네비닫기네비닫기네비닫기");        
+        setIsDest(false),
+        setIsSetOrigin(false),
+        setOriginCoords(null),
+        setDestCoords(null)
+    }
     //지도 초기화
     useEffect(() => {
         const map = new mapboxgl.Map({
@@ -50,7 +59,6 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
         })
         map.addControl(language); //언어팩 설정
         
-        
 
         //벤치 아이콘 추가
         map.on('load', () => {
@@ -58,8 +66,8 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
                 if (error) throw error;
                 map.addImage('bench-marker', image);
             });
-            // fetchNearbyData(map, center);
         })
+
         // styleimagemissing 이벤트 리스너 추가
         map.on('styleimagemissing', (e) => {
             if (e.id === 'bench-marker') {
@@ -115,7 +123,6 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
                 />
             );
             
-
             const popup = new mapboxgl.Popup()
                 .setLngLat(coordinates)
                 .setDOMContent(popupContent)
@@ -164,7 +171,8 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
         return () => map.remove();
        
     },[mapContainerRef , style , config])
-    //반경 200m 내 빌딩 데이터 가져오기 버튼
+    
+    //"주변 건뭏 조회" 버튼 클릭시 axois
     useEffect(()=>{
         if(map && center){
             fetchNearbyData(map, center);
@@ -177,7 +185,6 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
             const newCenter = map.getCenter();
             setCenter({ lng: newCenter.lng, lat: newCenter.lat });
             console.log("지도이동 newCenter",newCenter);
-            // fetchNearbyData(map, { lng: newCenter.lng, lat: newCenter.lat });
         }
     };
 
@@ -257,6 +264,7 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
             if (map.getLayer('buildings-fill')) map.removeLayer('buildings-fill');
             if (map.getLayer('buildings-outline')) map.removeLayer('buildings-outline');
             if (map.getSource('buildings')) map.removeSource('buildings');
+
             // 기존 벤치 레이어와 소스가 있다면 제거
             if (map.getLayer('benches')) map.removeLayer('benches');
             if (map.getSource('benches')) map.removeSource('benches');
