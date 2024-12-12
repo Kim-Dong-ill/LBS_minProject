@@ -1,9 +1,12 @@
 import mapboxgl from 'mapbox-gl'
+import ReactDOM from 'react-dom/client';
 import MapboxLanguage from "@mapbox/mapbox-gl-language";
 import {useEffect, useState} from 'react'
 import axios from 'axios'
 import benchIcon from "../../public/like.png"
 import initializeDirections from './initializeDirections'
+import BuildingPopup from '../components/BuildingPopup'
+import BenchPopup from '../components/BenchPopup'
 import '../css/mapBoxCustom.css'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
@@ -12,6 +15,25 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
     //const [isClicked, setIsClicked] = useState(false)
     const [center , setCenter] = useState(config.initialCenter);
     const [map, setMap] = useState(null);
+    const [isDest,setIsDest] = useState(false);
+    const [isOrigin,setIsSetOrigin] = useState(false);   
+    // 출발지와 도착지 좌표를 저장할 상태 추가
+    const [originCoords, setOriginCoords] = useState(null);
+    const [destCoords, setDestCoords] = useState(null);
+    const [currentPopup, setCurrentPopup] = useState(null); // 현재 팝업을 저장할 상태
+
+    // 출발지와 도착지가 모두 설정되었을 때 네비게이션 초기화
+    useEffect(() => {
+        if (map && isDest && isOrigin && originCoords && destCoords) {
+
+            // 열려있는 팝업 제거
+            if (currentPopup) {
+                currentPopup.remove();
+                setCurrentPopup(null);
+            }
+            initializeDirections(map,originCoords,destCoords);
+        }
+    }, [isDest, isOrigin, map, originCoords, destCoords]);
 
     //지도 초기화
     useEffect(() => {
@@ -28,8 +50,7 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
         })
         map.addControl(language); //언어팩 설정
         
-        //네비게이션 길찾기 초기화
-        initializeDirections(map)
+        
 
         //벤치 아이콘 추가
         map.on('load', () => {
@@ -42,7 +63,7 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
         // styleimagemissing 이벤트 리스너 추가
         map.on('styleimagemissing', (e) => {
             if (e.id === 'bench-marker') {
-                map.loadImage(`${benchIcon}`, (error, image) => {  // SVG 파일 경로를 실제 경로로 변경해주세요
+                map.loadImage(`${benchIcon}`, (error, image) => {
                     if (error) throw error;
                     map.addImage('bench-marker', image);
                 });
@@ -59,10 +80,90 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
             handleMapMove(map)
         })
 
+
+        // 건물 레이어 클릭 이벤트
+        map.on('click', 'buildings-fill',(e) =>{
+            if (!e.features.length) return;
+  
+            const feature = e.features[0];
+            const centroidStr = feature.properties.centroid;
+            console.log("해당 건물 좌표",centroidStr);
+            
+            const coordinates = centroidStr
+                .replace('POINT(', '')
+                .replace(')', '')
+                .split(' ')
+                .map(Number);  // [경도, 위도]
+
+                const SetDest=(state)=>{                    
+                    setIsDest(state);
+                    if (state) setDestCoords(coordinates);
+                }
+                const SetOrigin=(state)=>{                    
+                    setIsSetOrigin(state);
+                    if (state) setOriginCoords(coordinates);
+                }
+
+            const popupContent = document.createElement('div');
+            const root = ReactDOM.createRoot(popupContent);
+            root.render(
+                <BuildingPopup 
+                    properties={feature.properties} 
+                    coordinates={coordinates} 
+                    SetDest={SetDest}
+                    SetOrigin={SetOrigin}
+                />
+            );
+            
+
+            const popup = new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setDOMContent(popupContent)
+                .addTo(map);
+
+            setCurrentPopup(popup);
+        })
+        
+        
+        //벤치 레이어 클릭 이벤트
+        map.on('click', 'benches',(e) =>{
+            if (!e.features.length) return;
+            
+            const feature = e.features[0];
+            console.log("feature",feature);
+            const coordinates = feature.geometry.coordinates.slice();
+    
+            const SetDest=(state)=>{                    
+                setIsDest(state);
+                if (state) setDestCoords(coordinates);
+            }
+            const SetOrigin=(state)=>{                    
+                setIsSetOrigin(state);
+                if (state) setOriginCoords(coordinates);
+            }
+
+            const popupContent = document.createElement('div');
+            const root = ReactDOM.createRoot(popupContent);
+            root.render(
+                <BenchPopup 
+                    properties={feature.properties} 
+                    coordinates={coordinates} 
+                    SetDest={SetDest}
+                    SetOrigin={SetOrigin}
+                />
+            );
+    
+            const popup = new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setDOMContent(popupContent)
+                .addTo(map);
+
+            setCurrentPopup(popup);
+        })
+        
         return () => map.remove();
        
     },[mapContainerRef , style , config])
-
     //반경 200m 내 빌딩 데이터 가져오기 버튼
     useEffect(()=>{
         if(map && center){
@@ -139,7 +240,11 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
                     type: 'Feature',
                     properties: {
                         bldg_id: building.bldg_id,
-                        distance: building.distance
+                        bldg_nm: building.bldg_nm,
+                        road_nm_addr: building.road_nm_addr,
+                        lotno_addr: building.lotno_addr,
+                        distance: building.distance,
+                        centroid: building.centroid 
                     },
                     geometry: {
                         type: 'MultiPolygon',
@@ -157,7 +262,7 @@ function useMap(mapContainerRef , style , config , setIsLoading,isClicked) {
             if (map.getSource('benches')) map.removeSource('benches');
             
             
-            // 새로운 소스와 레이어 추가
+            // 새로운 빌딩 소스와 레이어 추가
             map.addSource('buildings', {
                 type: 'geojson',
                 data: geojsonData
