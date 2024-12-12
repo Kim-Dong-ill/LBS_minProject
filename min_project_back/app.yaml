@@ -1,0 +1,17 @@
+runtime: nodejs18  # Node.js 버전 지정
+
+env: standard     # 표준 환경 사용
+
+instance_class: F1  # 인스턴스 클래스 (F1은 가장 기본적인 무료 티어)
+
+automatic_scaling:  # 자동 스케일링 설정
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+
+env_variables:     # 환경 변수 설정
+  NODE_ENV: "production"
+
+handlers:
+- url: /.*
+  script: auto
