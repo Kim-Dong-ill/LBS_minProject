@@ -10,6 +10,10 @@ import BenchPopup from "../components/BenchPopup";
 import "../css/mapBoxCustom.css";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+//const apiUrl = import.meta.env.VITE_API_URL;
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL
+})
 
 function useMap(mapContainerRef, style, config, setIsLoading, isClicked) {
   //const [isClicked, setIsClicked] = useState(false)
@@ -190,14 +194,14 @@ function useMap(mapContainerRef, style, config, setIsLoading, isClicked) {
 
       //주변 건물&벤치 조회 axios
       const [responseBldg, responseBench] = await Promise.all([
-        axios.get("http://localhost:3000/nearby-bldg", {
+        api.get(`/nearby-bldg`, {
           params: {
             longitude: center.lng,
             latitude: center.lat,
             radius: 300, // 반경m (미터 단위)
           },
         }),
-        axios.get("http://localhost:3000/nearby-bench", {
+        api.get(`/nearby-bench`, {
           params: {
             longitude: center.lng,
             latitude: center.lat,

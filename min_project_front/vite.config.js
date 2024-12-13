@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   define: {
-    '__dirname': '""', // __dirname을 빈 문자열로 정의
-  },
+    'process.env': {
+      NODE_ENV: JSON.stringify('production')
+    }
+  }
 })
