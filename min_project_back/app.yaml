@@ -1,3 +1,5 @@
+service: react-mapbox-server
+
 runtime: nodejs18  # Node.js 버전 지정
 
 env: standard     # 표준 환경 사용
@@ -11,7 +13,15 @@ automatic_scaling:  # 자동 스케일링 설정
 
 env_variables:     # 환경 변수 설정
   NODE_ENV: "production"
+  PORT: "8080"  # App Engine은 8080 포트를 사용합니다
+  DB_DATABASE: "postgres"
+  DB_USER: "codelab"
+  DB_PASSWORD: "codelab1234"
 
+beta_settings:
+  cloud_sql_instances: "winged-woods-442503-f1:asia-northeast3:codelab"
+  
 handlers:
 - url: /.*
   script: auto
+  secure: always  # HTTPS 강제

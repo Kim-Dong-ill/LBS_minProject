@@ -3,15 +3,21 @@ import cors from 'cors';
 import mountRoutes from './routers/router.js';
 
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: [
+        'http://localhost:5173',
+        'https://react-dongill-mapbox-dot-winged-woods-442503-f1.du.r.appspot.com'
+    ],
+    credentials: true
+}));
 app.use(express.json());
 
 mountRoutes(app);
 
 app.listen(port, () => {
-    console.log('Server is running on port 3000');
+    console.log('Server is running on port 8080');
 });
